@@ -1,5 +1,10 @@
+// MK: removed unused demo controller files, moved this file in here
+
 (function () {
   'use strict';
+
+
+
 
   /*Clark Dever (clarkdever@gmail.com) - 20140830*/
 
@@ -92,28 +97,61 @@ ToDo:   Handle Deleted Keystrokes
         
     }
 
+    var keyPresses = [];
+
+
     //Start the clock on this keypresses duration
     $scope.onKeyDown = function (event) {
       pressDuration = event.timeStamp;
+      keyCode=event.keyCode;
       //if this is the first letter in the attempt, set our start word time.
       if(lastPress==0){
         startWord = event.timeStamp;
       }
+      $scope.downEvent = event;
+
+      //MK: todo, if you need more info, extract it from event and put add it to this object
+      keyPresses.push({keyCode: event.keyCode, start: event.timeStamp, end: null});
     };
 
 
-    //Start the clock on this keypresses duration
-    $scope.onKeyPress = function (event) {
-      keyCode=event.keyCode;
-    };    
+    //MK: removed
+    // //Start the clock on this keypresses duration
+    // $scope.onKeyPress = function (event) {
+    //   keyCode=event.keyCode;
+    // };    
 
     //Stop the clock on duration and store the keypress for visualization
     $scope.onKeyUp = function (event) {
-      //console.dir(event);
+
+      // console.dir(event);
       //Escape Shift and Enter Keystrokes
-      if(!(event.keyCode == 13 || event.keyCode == 16)){
-        $scope.recordkeystroke(event)
+      //MK: inverted this if statement, i like to check for bad then leave.
+      //it keeps code cleaner than checking for good condition and nesting the good logic inside curly brackets
+      if(event.keyCode == 13 || event.keyCode == 16){
+        return;
       } 
+
+      $scope.recordkeystroke(event);
+
+      //MK: this
+      //get the first key press that has the same keycode
+      var keyPress = _.find(keyPresses, function(kp){ return kp.keyCode === event.keyCode; });
+      //remove it from the array
+      keyPresses.splice(_.indexOf(keyPresses, keyPress), 1);
+
+      //add in the ending timestamp to the key press
+      //MK: todo, if you need more info, extract it from event and put add it to this object
+      keyPress.end = event.timeStamp;
+
+      //put it on the chart
+      $scope.recordKeyStrokeNew(keyPress);
+    };
+
+    $scope.recordKeyStrokeNew = function(keyPress){
+
+      console.log(keyPress);
+      $scope.keyPress = keyPress;
     };
 
     //empty the array
@@ -141,6 +179,7 @@ ToDo:   Handle Deleted Keystrokes
   
       //iterate our array
       itr++;
+
       //reset our reference frame
       lastPress = 0;
 
@@ -160,6 +199,8 @@ ToDo:   Handle Deleted Keystrokes
     
 
 }]);
+
+
 
           
 
